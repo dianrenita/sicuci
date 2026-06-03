@@ -109,15 +109,28 @@ export default function App() {
   };
 
   // SaaS simulated subscribe update
-  const handleTenantSubscribe = (planObj: any, cycle: 'monthly' | 'yearly', totalCost: number, voucherCode: string) => {
+  const handleTenantSubscribe = (
+    planObj: any, 
+    cycle: 'monthly' | 'yearly', 
+    totalCost: number, 
+    voucherCode: string,
+    customDetails?: {
+      businessName: string;
+      ownerName: string;
+      email: string;
+      phone: string;
+      subDomain: string;
+    }
+  ) => {
     // Generate new Invoice under the Owner tenant (Lestari Group - T-001)
     const activeTenantId = 'T-001';
     const newInvId = `LC/INV/${Math.floor(100000 + Math.random() * 900000)}`;
+    const businessName = customDetails?.businessName || 'Lestari Laundry Group';
     const newSaasInvoice: SaaSInvoice = {
       id: `INV-S-${Math.floor(100 + Math.random() * 900)}`,
       invoiceNo: newInvId,
       tenantId: activeTenantId,
-      businessName: 'Lestari Laundry Group',
+      businessName: businessName,
       planName: planObj.name,
       billingCycle: cycle,
       amount: totalCost,
@@ -129,11 +142,16 @@ export default function App() {
 
     setSaasInvoices(prev => [newSaasInvoice, ...prev]);
 
-    // Update Owner plan level
+    // Update Owner plan level & credentials
     setTenants(prev => prev.map(t => {
       if (t.id === activeTenantId) {
         return { 
           ...t, 
+          businessName: customDetails?.businessName || t.businessName,
+          ownerName: customDetails?.ownerName || t.ownerName,
+          email: customDetails?.email || t.email,
+          phone: customDetails?.phone || t.phone,
+          subDomain: customDetails?.subDomain || t.subDomain,
           planId: planObj.id, 
           billingCycle: cycle,
           nextBillingDate: cycle === 'monthly' 
@@ -171,6 +189,7 @@ export default function App() {
   // Helper values
   const currentOutletName = outlets.find(o => o.id === currentOutletId)?.name || 'Semua Cabang';
   const activeOperator = employees.find(e => e.role === 'Kasir') || employees[0];
+  const simActiveTenant = tenants.find(t => t.id === 'T-001') || tenants[0];
 
   useEffect(() => {
     // Automatically switch tabs depending on role change for UX friendliness
@@ -219,12 +238,12 @@ export default function App() {
           <div className="bg-slate-850 p-4 rounded-xl border border-slate-800 space-y-2">
             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Tenant Terpilih</span>
             <div className="flex items-center justify-between">
-              <strong className="text-xs text-white max-w-36 truncate">Lestari Laundry</strong>
-              <span className="bg-emerald-950 text-emerald-400 text-[8px] font-black uppercase px-1.5 py-0.5 rounded border border-green-900">
-                PRO ACTIVE
+              <strong className="text-xs text-white max-w-[140px] truncate">{simActiveTenant.businessName}</strong>
+              <span className="bg-blue-950 text-blue-300 text-[8px] font-black uppercase px-1.5 py-0.5 rounded border border-blue-900">
+                {simActiveTenant.planId.toUpperCase()}
               </span>
             </div>
-            <p className="text-[10px] text-slate-500 font-mono">Subdomain: <code>lestari.laundrycloud.id</code></p>
+            <p className="text-[10px] text-slate-500 font-mono">Subdomain: <code>{simActiveTenant.subDomain}.laundrycloud.id</code></p>
           </div>
 
           {/* Navigation link blocks filtered by Active Roles capability */}
@@ -322,7 +341,7 @@ export default function App() {
             </button>
             
             <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block font-mono">Workspace: Lestari Laundry Solo</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block font-mono">Workspace: {simActiveTenant.businessName}</span>
               <h2 className="text-base md:text-xl font-bold font-display text-slate-900">
                 {activeTab === 'dashboard' && 'Dashboard Operasional Bisnis'}
                 {activeTab === 'pos' && 'Point of Sale Terminal Kasir'}
@@ -405,6 +424,7 @@ export default function App() {
             <SaaSPricingCard 
               onSubscribe={handleTenantSubscribe}
               activePlanId={tenants.find(t => t.id === 'T-001')?.planId || 'professional'}
+              activeTenant={tenants.find(t => t.id === 'T-001')}
             />
           )}
 
