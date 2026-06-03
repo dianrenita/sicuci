@@ -1,6 +1,8 @@
 {
-  "name": "SiCuci Laundry",
-  "description": "Layanan laundry modern dengan paket Reguler, Begepeng, dan Sultan.",
+  "name": "LaundryCloud",
+  "description": "Multi-tenant SaaS Laundry management system for owners, managers, and cashiers, supporting subscriptions, multi-branch operations, real-time workflow monitoring, and POS billing.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
